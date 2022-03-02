@@ -1,39 +1,31 @@
-name: workflow-1
-on: [push]
-jobs:
-  # check-bats-version:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: '14'
-  #     - run: npm install -g bats
-  #     - run: bats -v
+name:  Cypress Tests using Cypress Docker Image
 
+on: [push]
+
+jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    # container: cypress/browsers:node12.13.0-chrome78-ff70
-    # name: E2E on Chrome
-    strategy:
-      matrix:
-        node: [10, 12]
-    name: E2E on Node v${{ matrix.node }}
+    container: cypress/browsers:node12.18.3-chrome87-ff82
     steps:
-      - name: Setup Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-      - run: node -v
-
       - name: Checkout
         uses: actions/checkout@v2
+
+      # - name: Download the build folders
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: build
+      #     path: build
+
+      - name: Save build folder
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          if-no-files-found: error
+          path: build
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          record: true
-          tag: node-${{ matrix.node }}
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # build: npm run build
+          runTests: false
+          build: yarn build
